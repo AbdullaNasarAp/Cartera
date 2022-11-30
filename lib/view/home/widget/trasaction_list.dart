@@ -5,8 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class TransactionList extends StatelessWidget {
-  const TransactionList({super.key, required this.transactions});
+  const TransactionList(
+      {super.key, required this.transactions, required this.deleteTx});
   final List<Transaction> transactions;
+  final Function deleteTx;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +29,19 @@ class TransactionList extends StatelessWidget {
                 itemCount: transactions.length,
                 itemBuilder: (context, index) {
                   return ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                              color: Colors.red,
+                              style: BorderStyle.solid,
+                              width: 2)),
+                      child: Text(
+                        "₹ ${transactions[index].amount.toString()}",
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20),
+                      ),
+                    ),
                     title: Text(
                       transactions[index].title,
                       style: GoogleFonts.montserrat(
@@ -40,22 +55,14 @@ class TransactionList extends StatelessWidget {
                           .format(transactions[index].date),
                       style: const TextStyle(color: Colors.grey, fontSize: 16),
                     ),
-                    trailing: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                              color: Colors.red,
-                              style: BorderStyle.solid,
-                              width: 2)),
-                      child: Flexible(
-                        fit: FlexFit.tight,
-                        child: Text(
-                          "₹ ${transactions[index].amount.toString()}",
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20),
-                        ),
-                      ),
-                    ),
+                    trailing: IconButton(
+                        onPressed: () {
+                          deleteTx(transactions[index].id);
+                        },
+                        icon: Icon(
+                          Icons.delete,
+                          color: Theme.of(context).errorColor,
+                        )),
                   );
                 }));
   }

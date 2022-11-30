@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class NewTransaction extends StatefulWidget {
   final Function? addTx;
@@ -10,22 +11,42 @@ class NewTransaction extends StatefulWidget {
 }
 
 class _NewTransactionState extends State<NewTransaction> {
-  final titleController = TextEditingController();
+  final _titleController = TextEditingController();
+  final _amountController = TextEditingController();
+  DateTime? _selectedDate;
 
-  final amountController = TextEditingController();
-
-  void submitData() {
-    final enteredTitle = titleController.text;
-    final enteredAmount = double.parse(amountController.text);
-
-    if (enteredTitle.isEmpty || enteredAmount <= 0) {
+  void _submitData() {
+    if (_amountController.text.isEmpty) {
       return;
     }
-    widget.addTx!(
-      enteredTitle,
-      enteredAmount,
-    );
+    final enteredTitle = _titleController.text;
+    final enteredAmount = double.parse(_amountController.text);
+
+    if (enteredTitle.isEmpty || enteredAmount <= 0 || _selectedDate == null) {
+      return;
+    }
+    widget.addTx!(enteredTitle, enteredAmount, _selectedDate);
     Navigator.of(context).pop();
+    const snackBar = SnackBar(
+        duration: Duration(milliseconds: 400),
+        content: Text("Transaction Added"));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  void _presentDatePicker() {
+    showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2022),
+            lastDate: DateTime.now())
+        .then((pickedDate) {
+      if (pickedDate == null) {
+        return;
+      }
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    });
   }
 
   @override
@@ -37,21 +58,21 @@ class _NewTransactionState extends State<NewTransaction> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             TextField(
-                controller: titleController,
+                controller: _titleController,
                 keyboardType: TextInputType.text,
                 decoration: const InputDecoration(
                   hintText: "Title",
                 ),
-                onSubmitted: (_) => submitData()),
+                onSubmitted: (_) => _submitData()),
             TextField(
-              controller: amountController,
+              controller: _amountController,
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
               decoration: const InputDecoration(
                 hintText: "Amount",
               ),
-              onSubmitted: (_) => submitData(),
+              onSubmitted: (_) => _submitData(),
             ),
             SizedBox(
               height: 70,
@@ -59,7 +80,9 @@ class _NewTransactionState extends State<NewTransaction> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "No data added",
+                    _selectedDate == null
+                        ? "No date added"
+                        : "Date : ${DateFormat.yMd().format(_selectedDate!)}",
                   ),
                   ElevatedButton(
                     style: ButtonStyle(
@@ -67,8 +90,8 @@ class _NewTransactionState extends State<NewTransaction> {
                         elevation: MaterialStateProperty.all(10),
                         shape: MaterialStateProperty.all(RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20)))),
-                    onPressed: () {},
-                    child: Text("Choose Date"),
+                    onPressed: _presentDatePicker,
+                    child: const Text("Choose Date"),
                   )
                 ],
               ),
@@ -79,7 +102,7 @@ class _NewTransactionState extends State<NewTransaction> {
                   elevation: MaterialStateProperty.all(10),
                   shape: MaterialStateProperty.all(RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20)))),
-              onPressed: submitData,
+              onPressed: _submitData,
               child: const Text(
                 "Add Transaction",
               ),
