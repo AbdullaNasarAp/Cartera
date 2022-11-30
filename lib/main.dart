@@ -15,9 +15,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+      home: const HomeScreen(),
       theme: ThemeData(
         textTheme: TextTheme(
+          bodyText1: GoogleFonts.montserrat(),
           bodyText2: GoogleFonts.montserrat(),
         ),
         primaryColor: Colors.red,

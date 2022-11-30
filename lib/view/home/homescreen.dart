@@ -1,4 +1,5 @@
 import 'package:cartera/controller/model/transaction/transaction.dart';
+import 'package:cartera/view/home/widget/chart/chart.dart';
 import 'package:cartera/view/home/widget/new_transacton.dart';
 import 'package:cartera/view/home/widget/trasaction_list.dart';
 import 'package:flutter/material.dart';
@@ -11,20 +12,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<Transaction> _userTransaction = [
-    // Transaction(
-    //   id: 't1',
-    //   title: 'Buy a Iphone',
-    //   amount: 129000,
-    //   date: DateTime.now(),
-    // ),
-    // Transaction(
-    //   id: 't2',
-    //   title: 'Buy a Watch',
-    //   amount: 22000,
-    //   date: DateTime.now(),
-    // ),
-  ];
+  final List<Transaction> _userTransaction = [];
   void _addNewTranscation(String txTitle, double txAmount) {
     final newTx = Transaction(
         id: DateTime.now().toString(),
@@ -36,16 +24,22 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  List<Transaction> get recentTransaction {
+    return _userTransaction.where((tx) {
+      return tx.date.isAfter(DateTime.now().subtract(const Duration(days: 7)));
+    }).toList();
+  }
+
   void startAddNewTransaction(BuildContext ctx) {
     showModalBottomSheet(
         context: ctx,
         builder: (_) {
           return GestureDetector(
             onTap: () {},
+            behavior: HitTestBehavior.opaque,
             child: NewTransaction(
               addTx: _addNewTranscation,
             ),
-            behavior: HitTestBehavior.opaque,
           );
         });
   }
@@ -58,18 +52,27 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
+          elevation: 20,
+          shadowColor: Colors.blue,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.elliptical(
+                200,
+                500,
+              ),
+              bottomRight: Radius.elliptical(
+                200,
+                500,
+              ),
+            ),
+          ),
           title: const Text("Cartera"),
           centerTitle: true,
         ),
         body: SingleChildScrollView(
           child: Column(
             children: [
-              Container(
-                  width: double.infinity,
-                  child: const Card(
-                    color: Colors.red,
-                    child: Text("grid"),
-                  )),
+              Chart(recentTransaction: recentTransaction),
               TransactionList(transactions: _userTransaction)
             ],
           ),
@@ -80,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: (() {
               startAddNewTransaction(context);
             }),
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
         ),
       ),
